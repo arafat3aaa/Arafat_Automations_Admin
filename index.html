@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | AutoFlow Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── RESET & BASE ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:     #080b14;
+      --bg2:    #0d1120;
+      --bg3:    #111827;
+      --card:   #131929;
+      --border: rgba(99,102,241,0.18);
+      --primary: #6366f1;
+      --primary-light: #818cf8;
+      --accent:  #06b6d4;
+      --text:    #f1f5f9;
+      --muted:   #94a3b8;
+      --dim:     #475569;
+      --grad:    linear-gradient(135deg, #6366f1, #06b6d4);
+      --red:     #ef4444;
+      --green:   #22c55e;
+      --radius:  14px;
+      --radius-sm: 10px;
+      --shadow:  0 20px 60px rgba(0,0,0,0.5);
+      --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+      --sidebar-w: 260px;
+    }
+    html, body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100%;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; font-family: inherit; }
+    img { max-width: 100%; display: block; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+
+    /* ── LAYOUT ── */
+    .admin-layout { display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      transition: transform var(--transition);
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 28px 24px 20px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo .logo-icon { font-size: 1.3rem; }
+    .sidebar-logo .logo-accent { color: var(--primary-light); }
+
+    .sidebar-badge {
+      display: inline-block;
+      background: rgba(99,102,241,0.15);
+      color: var(--primary-light);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-left: auto;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .nav-item .nav-icon { font-size: 1.1rem; }
+    .nav-item:hover { background: rgba(99,102,241,0.08); color: var(--text); }
+    .nav-item.active { background: rgba(99,102,241,0.14); color: var(--primary-light); }
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 3px;
+      height: 28px;
+      background: var(--grad);
+      border-radius: 0 3px 3px 0;
+    }
+    .nav-item { position: relative; }
+
+    .sidebar-footer {
+      padding: 16px 12px;
+      border-top: 1px solid var(--border);
+    }
+    .view-site-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 11px 16px;
+      background: var(--grad);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: var(--transition);
+      box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+    }
+    .view-site-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.45); }
+
+    /* ── MAIN CONTENT ── */
+    .main-content {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 36px 40px;
+      min-height: 100vh;
+    }
+
+    .page-header {
+      margin-bottom: 36px;
+    }
+    .page-header h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .page-header p { color: var(--muted); font-size: 0.92rem; }
+
+    /* Tabs */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── CARDS ── */
+    .panel-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 28px;
+    }
+    .panel-card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ── PROFILE PHOTOS ── */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .photo-slot { text-align: center; }
+    .photo-preview {
+      width: 100%;
+      aspect-ratio: 3/4;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 2px dashed var(--border);
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition);
+      background: var(--bg3);
+    }
+    .photo-preview:hover { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    .photo-preview img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: top;
+    }
+    .photo-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: var(--transition);
+      gap: 8px;
+    }
+    .photo-preview:hover .photo-overlay { opacity: 1; }
+    .photo-overlay span { font-size: 2.5rem; }
+    .photo-overlay p { font-size: 0.82rem; font-weight: 600; color: #fff; }
+    .photo-slot label {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .photo-input { display: none; }
+
+    /* ── AUTOMATION FORM ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 18px;
+    }
+    .field.full { grid-column: 1 / -1; }
+    .field label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .field input,
+    .field textarea,
+    .field select {
+      background: var(--bg3);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 15px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      transition: var(--transition);
+      outline: none;
+      width: 100%;
+    }
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    }
+    .field input::placeholder, .field textarea::placeholder { color: var(--dim); }
+    .field textarea { resize: vertical; min-height: 90px; }
+    .field select option { background: var(--bg3); }
+
+    /* Image upload area */
+    .img-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 36px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--bg3);
+      position: relative;
+    }
+    .img-upload-area:hover { border-color: var(--primary); background: rgba(99,102,241,0.05); }
+    .img-upload-area .upload-icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .img-upload-area p { color: var(--muted); font-size: 0.88rem; }
+    .img-upload-area .browse-text { color: var(--primary-light); font-weight: 600; }
+    .img-upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .img-preview-wrap {
+      display: none;
+      position: relative;
+    }
+    .img-preview-wrap img {
+      width: 100%;
+      border-radius: var(--radius-sm);
+      max-height: 200px;
+      object-fit: cover;
+      border: 1.5px solid var(--border);
+    }
+    .img-remove-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: rgba(239,68,68,0.85);
+      color: #fff;
+      border-radius: 50%;
+      width: 28px; height: 28px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Action Buttons */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: var(--transition);
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--grad);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(99,102,241,0.45); }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary-light); }
+    .btn-danger {
+      background: rgba(239,68,68,0.12);
+      border: 1.5px solid rgba(239,68,68,0.25);
+      color: #fca5a5;
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); border-color: var(--red); }
+
+    /* ── SAVED AUTOMATIONS LIST ── */
+    .automation-list { display: flex; flex-direction: column; gap: 14px; }
+    .auto-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      transition: var(--transition);
+    }
+    .auto-item:hover { border-color: rgba(99,102,241,0.3); }
+    .auto-item-img {
+      width: 64px; height: 48px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--card);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+    }
+    .auto-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .auto-item-info { flex: 1; }
+    .auto-item-info h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 3px; }
+    .auto-item-info span {
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(99,102,241,0.14);
+      color: var(--primary-light);
+      padding: 2px 9px;
+      border-radius: 100px;
+    }
+    .auto-item-actions { display: flex; gap: 8px; }
+    .icon-btn {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: var(--transition);
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+    }
+    .icon-btn:hover { border-color: var(--primary); color: var(--primary-light); background: rgba(99,102,241,0.1); }
+    .icon-btn.del:hover { border-color: var(--red); color: #fca5a5; background: rgba(239,68,68,0.1); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px;
+      color: var(--dim);
+      font-size: 0.92rem;
+    }
+    .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: var(--transition);
+      z-index: 9999;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: rgba(34,197,94,0.4); }
+    .toast.error { border-color: rgba(239,68,68,0.4); }
+
+    /* Mobile top bar */
+    .mobile-topbar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+    .mobile-menu-btn { font-size: 1.4rem; background: none; color: var(--text); }
+
+    /* Section label */
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--dim);
+      padding: 10px 16px 6px;
+    }
+
+    /* Drag hint */
+    .drag-hint {
+      font-size: 0.75rem;
+      color: var(--dim);
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 20px; }
+      .mobile-topbar { display: flex; }
+      .photo-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Mobile top bar -->
+<div class="mobile-topbar">
+  <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+  <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;">⚡ Admin Panel</span>
+  <a href="index.html" class="btn btn-primary" style="padding:8px 14px;font-size:0.8rem;">→ Site</a>
+</div>
+
+<div class="admin-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">⚡</span>
+      <span>AutoFlow<span class="logo-accent">Pro</span></span>
+      <span class="sidebar-badge">Admin</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="section-label">Manage</div>
+      <div class="nav-item active" onclick="switchTab('photos', this)">
+        <span class="nav-icon">🖼️</span> Profile Photos
+      </div>
+      <div class="nav-item" onclick="switchTab('automations', this)">
+        <span class="nav-icon">⚡</span> Automations
+      </div>
+      <div class="section-label" style="margin-top:8px;">Quick</div>
+      <div class="nav-item" onclick="switchTab('add', this)">
+        <span class="nav-icon">➕</span> Add New Automation
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <a href="index.html" target="_blank" class="view-site-btn">
+        🌐 View Live Site
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- TAB: PROFILE PHOTOS -->
+    <div class="tab-panel active" id="tab-photos">
+      <div class="page-header">
+        <h1>🖼️ Profile Photos</h1>
+        <p>Click on a photo to replace it. Changes update the main site instantly.</p>
+      </div>
+      <div class="panel-card">
+        <h2>📸 Hero Section Photos</h2>
+        <div class="photo-grid">
+          <div class="photo-slot">
+            <div class="photo-preview" onclick="document.getElementById('photoInput1').click()">
+              <img src="images/profile1.jpg" id="photoPreview1" alt="Photo 1" />
+              <div class="photo-overlay">
+                <span>📂</span>
+                <p>Click to Change</p>
+              </div>
+            </div>
+            <input type="file" id="photoInput1" class="photo-input" accept="image/*" onchange="updatePhoto(1, this)" />
+            <label>Photo 1 (First slide)</label>
+          </div>
+          <div class="photo-slot">
+            <div class="photo-preview" onclick="document.getElementById('photoInput2').click()">
+              <img src="images/profile2.jpg" id="photoPreview2" alt="Photo 2" />
+              <div class="photo-overlay">
+                <span>📂</span>
+                <p>Click to Change</p>
+              </div>
+            </div>
+            <input type="file" id="photoInput2" class="photo-input" accept="image/*" onchange="updatePhoto(2, this)" />
+            <label>Photo 2 (Second slide + About)</label>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:24px;">
+          <button class="btn btn-outline" onclick="resetPhotos()">↩ Reset to Original</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: AUTOMATIONS LIST -->
+    <div class="tab-panel" id="tab-automations">
+      <div class="page-header">
+        <h1>⚡ My Automations</h1>
+        <p>All your automation cards that appear on the portfolio site.</p>
+      </div>
+      <div class="panel-card">
+        <h2>📋 Saved Automations
+          <button class="btn btn-primary" style="margin-left:auto;padding:8px 16px;font-size:0.82rem;" onclick="switchTab('add', document.querySelector('.nav-item:nth-child(4)'))">+ Add New</button>
+        </h2>
+        <div class="automation-list" id="automationList"></div>
+      </div>
+    </div>
+
+    <!-- TAB: ADD / EDIT AUTOMATION -->
+    <div class="tab-panel" id="tab-add">
+      <div class="page-header">
+        <h1 id="formTitle">➕ Add Automation</h1>
+        <p>Fill in the details and upload a screenshot of your automation.</p>
+      </div>
+      <div class="panel-card">
+        <h2>📝 Automation Details</h2>
+        <input type="hidden" id="editId" value="" />
+        <div class="form-row">
+          <div class="field">
+            <label>Title *</label>
+            <input type="text" id="autoTitle" placeholder="e.g. Lead Auto-Responder Flow" />
+          </div>
+          <div class="field">
+            <label>Category *</label>
+            <select id="autoTag">
+              <option value="n8n">n8n</option>
+              <option value="python">Python</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Short Summary * (shown on card)</label>
+          <input type="text" id="autoSummary" placeholder="One-line description of what this automation does..." />
+        </div>
+        <div class="field">
+          <label>Full Description (shown in popup)</label>
+          <textarea id="autoDescription" placeholder="Detailed explanation of how this automation works, what triggers it, what it does step by step..."></textarea>
+        </div>
+        <div class="field">
+          <label>Automation Screenshot / Image</label>
+          <div class="img-upload-area" id="imgUploadArea">
+            <input type="file" id="autoImgInput" accept="image/*" onchange="previewAutoImage(this)" />
+            <div class="upload-icon">🖼️</div>
+            <p>Drag & drop or <span class="browse-text">browse</span> to upload</p>
+            <p style="font-size:0.78rem;margin-top:6px;color:var(--dim)">PNG, JPG, GIF up to 5MB</p>
+          </div>
+          <div class="img-preview-wrap" id="imgPreviewWrap">
+            <img id="autoImgPreview" src="" alt="Preview" />
+            <button class="img-remove-btn" onclick="removeAutoImage()">✕</button>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="saveAutomation()">💾 Save Automation</button>
+          <button class="btn btn-outline" onclick="resetForm()">✕ Clear</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── STORAGE KEYS (must match script.js) ──
+  const STORAGE_KEY  = 'afp_automations';
+  const PROFILES_KEY = 'afp_profiles';
+
+  const DEFAULT_AUTOMATIONS = [
+    { id:1, icon:"🔄", tag:"n8n", tagLabel:"n8n", title:"Lead Auto-Responder Flow", summary:"Captures leads from a webhook, enriches data, and sends a personalised reply email instantly.", description:"When a visitor submits a lead form the n8n webhook fires, the workflow enriches the contact data via an external API, creates a CRM record, and sends a branded auto-reply — all within seconds.", image:"" },
+    { id:2, icon:"🐍", tag:"python", tagLabel:"Python", title:"Competitor Price Tracker", summary:"Python script that scrapes competitor websites daily and emails a price-change report every morning.", description:"A scheduled Python script uses BeautifulSoup to scrape competitor product pages, compares prices against the previous day's data stored in SQLite, then emails a formatted HTML report.", image:"" },
+    { id:3, icon:"🔄", tag:"n8n", tagLabel:"n8n", title:"Social Media Publisher", summary:"Auto-posts content queued in Google Sheets to Twitter, LinkedIn, and Telegram on a schedule.", description:"An n8n workflow polls a Google Sheet on a cron schedule, picks the next queued post, publishes it simultaneously to Twitter, LinkedIn, and a Telegram channel, then marks the row as 'Published'.", image:"" },
+    { id:4, icon:"🐍", tag:"python", tagLabel:"Python", title:"AI Email Classifier Bot", summary:"Reads your inbox, classifies every email with GPT-4, and files them into labelled folders automatically.", description:"A Python daemon connects to Gmail via IMAP, passes each unread email through the OpenAI API to classify it (lead / support / spam / newsletter), then moves the message to the appropriate label.", image:"" },
+  ];
+
+  // ── STATE ──
+  let automations = [];
+  let profiles = { p1: 'images/profile1.jpg', p2: 'images/profile2.jpg' };
+  let editIndex = -1;
+  let pendingImgData = '';
+
+  function load() {
+    try {
+      const a = localStorage.getItem(STORAGE_KEY);
+      automations = a ? JSON.parse(a) : JSON.parse(JSON.stringify(DEFAULT_AUTOMATIONS));
+    } catch(e) {
+      automations = JSON.parse(JSON.stringify(DEFAULT_AUTOMATIONS));
+    }
+    try {
+      const p = localStorage.getItem(PROFILES_KEY);
+      if (p) { const parsed = JSON.parse(p); if (parsed.p1 || parsed.p2) profiles = parsed; }
+    } catch(e) {}
+  }
+
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(automations));
+  }
+  function saveProfiles() {
+    localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+  }
+
+  // ── TABS ──
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+    if (name === 'automations') renderList();
+    if (name === 'add' && editIndex === -1) resetForm();
+    // Close mobile sidebar
+    document.getElementById('sidebar').classList.remove('open');
+  }
+
+  // ── PROFILE PHOTOS ──
+  function updatePhoto(num, input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) { showToast('Image too large (max 4 MB)', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const data = e.target.result;
+      document.getElementById('photoPreview' + num).src = data;
+      if (num === 1) profiles.p1 = data;
+      else           profiles.p2 = data;
+      saveProfiles();
+      showToast('Photo ' + num + ' updated! ✅');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function resetPhotos() {
+    if (!confirm('Reset both photos to the original files?')) return;
+    profiles = { p1: 'images/profile1.jpg', p2: 'images/profile2.jpg' };
+    saveProfiles();
+    document.getElementById('photoPreview1').src = profiles.p1;
+    document.getElementById('photoPreview2').src = profiles.p2;
+    showToast('Photos reset to originals ↩');
+  }
+
+  // Load saved profile previews
+  function initPhotoPreviews() {
+    const stored = localStorage.getItem(PROFILES_KEY);
+    if (stored) {
+      try {
+        const p = JSON.parse(stored);
+        if (p.p1) document.getElementById('photoPreview1').src = p.p1;
+        if (p.p2) document.getElementById('photoPreview2').src = p.p2;
+      } catch(e) {}
+    }
+  }
+
+  // ── AUTOMATION LIST ──
+  function renderList() {
+    const list = document.getElementById('automationList');
+    if (automations.length === 0) {
+      list.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>No automations yet. Add your first one!</p></div>';
+      return;
+    }
+    list.innerHTML = automations.map((a, i) => `
+      <div class="auto-item">
+        <div class="auto-item-img">
+          ${a.image ? `<img src="${a.image}" alt="${a.title}" />` : (a.icon || '⚡')}
+        </div>
+        <div class="auto-item-info">
+          <h4>${a.title}</h4>
+          <span>${a.tagLabel || a.tag}</span>
+        </div>
+        <div class="auto-item-actions">
+          <button class="icon-btn" onclick="editAutomation(${i})" title="Edit">✏️</button>
+          <button class="icon-btn del" onclick="deleteAutomation(${i})" title="Delete">🗑️</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function editAutomation(i) {
+    editIndex = i;
+    const a = automations[i];
+    document.getElementById('formTitle').textContent = '✏️ Edit Automation';
+    document.getElementById('editId').value = i;
+    document.getElementById('autoTitle').value = a.title || '';
+    document.getElementById('autoTag').value = a.tag || 'n8n';
+    document.getElementById('autoSummary').value = a.summary || '';
+    document.getElementById('autoDescription').value = a.description || '';
+    pendingImgData = a.image || '';
+    if (a.image) {
+      document.getElementById('autoImgPreview').src = a.image;
+      document.getElementById('imgPreviewWrap').style.display = 'block';
+      document.getElementById('imgUploadArea').style.display = 'none';
+    } else {
+      document.getElementById('imgPreviewWrap').style.display = 'none';
+      document.getElementById('imgUploadArea').style.display = 'block';
+    }
+    switchTab('add', document.querySelectorAll('.nav-item')[2]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function deleteAutomation(i) {
+    if (!confirm(`Delete "${automations[i].title}"?`)) return;
+    automations.splice(i, 1);
+    save();
+    renderList();
+    showToast('Automation deleted 🗑️');
+  }
+
+  // ── ADD / EDIT FORM ──
+  function previewAutoImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showToast('Image too large (max 5 MB)', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      pendingImgData = e.target.result;
+      document.getElementById('autoImgPreview').src = pendingImgData;
+      document.getElementById('imgPreviewWrap').style.display = 'block';
+      document.getElementById('imgUploadArea').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeAutoImage() {
+    pendingImgData = '';
+    document.getElementById('autoImgInput').value = '';
+    document.getElementById('imgPreviewWrap').style.display = 'none';
+    document.getElementById('imgUploadArea').style.display = 'block';
+  }
+
+  function saveAutomation() {
+    const title   = document.getElementById('autoTitle').value.trim();
+    const tag     = document.getElementById('autoTag').value;
+    const summary = document.getElementById('autoSummary').value.trim();
+    const desc    = document.getElementById('autoDescription').value.trim();
+
+    if (!title || !summary) { showToast('Title and Summary are required!', 'error'); return; }
+
+    const tagLabels = { n8n: 'n8n', python: 'Python' };
+    const icons     = { n8n: '🔄', python: '🐍' };
+
+    const auto = {
+      id: Date.now(),
+      icon: icons[tag] || '⚡',
+      tag,
+      tagLabel: tagLabels[tag] || tag,
+      title,
+      summary,
+      description: desc,
+      image: pendingImgData,
+    };
+
+    if (editIndex >= 0 && editIndex < automations.length) {
+      automations[editIndex] = { ...automations[editIndex], ...auto };
+      showToast('Automation updated! ✅');
+    } else {
+      automations.push(auto);
+      showToast('Automation added! 🚀');
+    }
+    save();
+    resetForm();
+    switchTab('automations', document.querySelectorAll('.nav-item')[1]);
+  }
+
+  function resetForm() {
+    editIndex = -1;
+    pendingImgData = '';
+    document.getElementById('formTitle').textContent = '➕ Add Automation';
+    document.getElementById('editId').value = '';
+    document.getElementById('autoTitle').value = '';
+    document.getElementById('autoTag').value = 'n8n';
+    document.getElementById('autoSummary').value = '';
+    document.getElementById('autoDescription').value = '';
+    document.getElementById('autoImgInput').value = '';
+    document.getElementById('imgPreviewWrap').style.display = 'none';
+    document.getElementById('imgUploadArea').style.display = 'block';
+  }
+
+  // ── TOAST ──
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+    t.className = 'toast ' + type + ' show';
+    setTimeout(() => t.className = 'toast', 2800);
+  }
+
+  // ── MOBILE SIDEBAR ──
+  document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  // Close sidebar on outside click
+  document.addEventListener('click', e => {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar.classList.contains('open') &&
+        !sidebar.contains(e.target) &&
+        !document.getElementById('mobileMenuBtn').contains(e.target)) {
+      sidebar.classList.remove('open');
+    }
+  });
+
+  // ── INIT ──
+  load();
+  initPhotoPreviews();
+  renderList();
+</script>
+</body>
+</html>
